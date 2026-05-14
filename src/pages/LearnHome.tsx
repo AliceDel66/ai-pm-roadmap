@@ -13,7 +13,7 @@ export function LearnHome() {
         <div className="panel rounded-2xl p-6 lg:p-8">
           <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-center">
             <div>
-              <h1 className="text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">AI 产品经理开源课程</h1>
+              <h1 className="text-4xl font-semibold tracking-normal text-slate-950 dark:text-white">AI 产品经理</h1>
               <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300">
                 从岗位认知、产品基本功、AI 基础、技术协作到项目实战和作品集，按阶段阅读课程、完成练习和作业。
               </p>
