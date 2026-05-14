@@ -11,6 +11,7 @@ interface LearningPathProps {
   onSelectStage: (stageId: string) => void;
   onSearch: (value: string) => void;
   onToggleTask: (taskId: string) => void;
+  stageProgress?: { stageId: string; done: number; total: number; percent: number; completed: boolean }[];
 }
 
 export function LearningPath({
@@ -21,6 +22,7 @@ export function LearningPath({
   onSelectStage,
   onSearch,
   onToggleTask,
+  stageProgress,
 }: LearningPathProps) {
   const [expandedId, setExpandedId] = useState("stage-1");
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -78,6 +80,7 @@ export function LearningPath({
               stage={stage}
               expanded={expandedId === stage.id}
               completedTasks={completedTasks}
+              progress={stageProgress?.find((item) => item.stageId === stage.id)}
               onToggleExpand={() => setExpandedId((current) => (current === stage.id ? "" : stage.id))}
               onToggleTask={onToggleTask}
             />

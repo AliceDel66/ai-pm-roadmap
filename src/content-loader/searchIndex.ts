@@ -1,8 +1,11 @@
 import { practiceProjects } from "../data/projects";
 import { glossaryDocs } from "./glossaryLoader";
 import { lessonDocs, stageDocs } from "./courseLoader";
+import { projectDocs } from "./projectLoader";
 import { templateDocs } from "./templateLoader";
 import type { SearchResult } from "./types";
+
+const projectDocById = new Map(projectDocs.map((project) => [project.frontmatter.project || project.slug, project]));
 
 export const searchIndex: SearchResult[] = [
   ...stageDocs.map((stage) => ({
@@ -43,16 +46,19 @@ export const searchIndex: SearchResult[] = [
     tags: item.frontmatter.tags || [],
     haystack: `${item.frontmatter.title} ${item.frontmatter.term || ""} ${item.content} ${(item.frontmatter.tags || []).join(" ")}`,
   })),
-  ...practiceProjects.map((project) => ({
-    id: `project:${project.id}`,
-    type: "项目" as const,
-    title: project.name,
-    excerpt: project.goal,
-    href: `/projects/${project.id}`,
-    stageTitle: project.stage,
-    tags: project.skills,
-    haystack: Object.values(project).flat().join(" "),
-  })),
+  ...practiceProjects.map((project) => {
+    const projectDoc = projectDocById.get(project.id);
+    return {
+      id: `project:${project.id}`,
+      type: "项目" as const,
+      title: projectDoc?.frontmatter.title || project.name,
+      excerpt: projectDoc?.excerpt || project.goal,
+      href: `/projects/${project.id}`,
+      stageTitle: project.stage,
+      tags: projectDoc?.frontmatter.tags || project.skills,
+      haystack: `${Object.values(project).flat().join(" ")} ${projectDoc?.content || ""} ${(projectDoc?.frontmatter.tags || []).join(" ")}`,
+    };
+  }),
 ];
 
 export function searchContent(query: string) {

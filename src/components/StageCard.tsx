@@ -6,13 +6,17 @@ interface StageCardProps {
   stage: LearningStage;
   expanded: boolean;
   completedTasks: Record<string, boolean>;
+  progress?: { done: number; total: number; percent: number };
   onToggleExpand: () => void;
   onToggleTask: (taskId: string) => void;
 }
 
-export function StageCard({ stage, expanded, completedTasks, onToggleExpand, onToggleTask }: StageCardProps) {
-  const done = stage.tasks.filter((task) => completedTasks[task.id]).length;
-  const percent = Math.round((done / stage.tasks.length) * 100);
+export function StageCard({ stage, expanded, completedTasks, progress, onToggleExpand, onToggleTask }: StageCardProps) {
+  const taskDone = stage.tasks.filter((task) => completedTasks[task.id]).length;
+  const taskPercent = stage.tasks.length ? Math.round((taskDone / stage.tasks.length) * 100) : 0;
+  const done = progress?.done ?? taskDone;
+  const total = progress?.total ?? stage.tasks.length;
+  const percent = progress?.percent ?? taskPercent;
   const stageSlugMap: Record<string, string> = {
     "stage-1": "stage-01-ai-pm-intro",
     "stage-2": "stage-02-product-foundation",
@@ -49,7 +53,7 @@ export function StageCard({ stage, expanded, completedTasks, onToggleExpand, onT
           <div className="flex min-w-40 items-center gap-3 sm:justify-end">
             <div className="w-full sm:w-32">
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                <span>{done}/{stage.tasks.length}</span>
+                <span>{done}/{total}</span>
                 <span>{percent}%</span>
               </div>
               <div className="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">

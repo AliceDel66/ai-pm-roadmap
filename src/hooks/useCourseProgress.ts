@@ -103,6 +103,10 @@ export function useCourseProgress() {
     }));
   };
 
+  const resetProgress = () => {
+    setState(initialState);
+  };
+
   return {
     state,
     completedLessonSet,
@@ -117,5 +121,6 @@ export function useCourseProgress() {
     toggleAssignment,
     toggleQuiz,
     toggleProject,
+    resetProgress,
   };
 }

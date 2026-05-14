@@ -10,9 +10,10 @@ interface ProgressTrackerProps {
   stageProgress: { stageId: string; done: number; total: number; percent: number; completed: boolean }[];
   nextTask: { title: string; detail: string; stageName: string } | null;
   onReset: () => void;
+  unitLabel?: string;
 }
 
-export function ProgressTracker({ stages, percent, level, completedCount, totalTasks, stageProgress, nextTask, onReset }: ProgressTrackerProps) {
+export function ProgressTracker({ stages, percent, level, completedCount, totalTasks, stageProgress, nextTask, onReset, unitLabel = "个阶段任务" }: ProgressTrackerProps) {
   return (
     <section className="py-12">
       <div className="container-page">
@@ -25,7 +26,7 @@ export function ProgressTracker({ stages, percent, level, completedCount, totalT
               </div>
               <h2 className="mt-3 text-3xl font-semibold text-slate-950 dark:text-white">{level}</h2>
               <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                已完成 {completedCount} / {totalTasks} 个阶段任务。进度会自动保存到 localStorage，刷新页面后仍然保留。
+                已完成 {completedCount} / {totalTasks} {unitLabel}。进度会自动保存到 localStorage，刷新页面后仍然保留。
               </p>
               <div className="mt-5 h-3 rounded-full bg-slate-200 dark:bg-slate-800">
                 <div className="h-3 rounded-full bg-gradient-to-r from-blue-600 via-violet-500 to-cyan-400" style={{ width: `${percent}%` }} />
@@ -60,7 +61,7 @@ export function ProgressTracker({ stages, percent, level, completedCount, totalT
                       <div className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" style={{ width: `${progress.percent}%` }} />
                     </div>
                     <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                      {progress.done}/{progress.total} 个任务
+                      {progress.done}/{progress.total} {unitLabel}
                     </p>
                   </div>
                 );

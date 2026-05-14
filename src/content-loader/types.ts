@@ -61,6 +61,15 @@ export interface GlossaryDoc {
   headings: HeadingItem[];
 }
 
+export interface ProjectDoc {
+  slug: string;
+  path: string;
+  frontmatter: ContentFrontmatter;
+  content: string;
+  excerpt: string;
+  headings: HeadingItem[];
+}
+
 export interface SearchResult {
   id: string;
   type: "课程" | "阶段" | "模板" | "术语" | "项目";
