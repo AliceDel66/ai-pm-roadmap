@@ -1,0 +1,83 @@
+import type { FlowAnimationDefinition } from "../../components/animations/animationTypes";
+
+export const customerServiceFlow: FlowAnimationDefinition = {
+  id: "customer-service-flow",
+  type: "flow",
+  title: "AI 智能客服流程",
+  description: "展示智能客服如何识别意图、检索知识、生成候选答案，并在低置信度时转人工。",
+  tags: ["智能客服", "人机协同", "置信度"],
+  why: "智能客服的核心不是完全替代人工，而是把高频低风险问题自动化，把高风险和不确定问题稳定交给人工。",
+  hint: "重点查看置信度判断和转人工节点，它们是产品风险控制的关键。",
+  data: {
+    autoPlay: false,
+    interval: 4200,
+    steps: [
+      {
+        id: "consult",
+        title: "用户发起咨询",
+        description: "用户通过网页、App 或其他入口提出问题。",
+        nodeType: "input",
+        details: "做什么：接收用户问题、身份、订单或历史会话。\nPM关注：入口、首句引导、用户隐私和是否需要登录。\n技术实现：会话 ID、用户标识、渠道来源、上下文注入。\n做不好会出现：缺少订单或身份信息，客服无法给出可执行答案。",
+      },
+      {
+        id: "intent",
+        title: "识别用户意图",
+        description: "判断用户在问政策、投诉、进度、退款还是其他问题。",
+        nodeType: "ai",
+        details: "做什么：分类意图并抽取关键实体。\nPM关注：意图体系要覆盖高频问题，并允许用户改正意图。\n技术实现：意图分类、实体抽取、置信度分数。\n做不好会出现：机器人答非所问，用户需要重复描述。",
+      },
+      {
+        id: "knowledge",
+        title: "检索知识库",
+        description: "根据意图和问题检索规则、FAQ 或工单知识。",
+        nodeType: "database",
+        details: "做什么：查找可回答问题的制度、流程和话术。\nPM关注：知识库更新、权限、版本和过期内容。\n技术实现：RAG 检索、关键词检索、元数据过滤。\n做不好会出现：客服引用旧规则，造成错误承诺或投诉。",
+      },
+      {
+        id: "candidate",
+        title: "生成候选答案",
+        description: "基于知识片段生成可发送给用户的候选答复。",
+        nodeType: "ai",
+        details: "做什么：整合知识片段并生成清晰话术。\nPM关注：话术是否符合品牌口径，是否保留引用或内部依据。\n技术实现：Prompt 模板、引用、敏感内容过滤。\n做不好会出现：答案过度承诺、口径不一致或缺少必要条件。",
+      },
+      {
+        id: "confidence",
+        title: "置信度判断",
+        description: "判断系统是否足够确定可以直接回答。",
+        nodeType: "decision",
+        details: "做什么：结合检索分数、意图分数、规则和风险等级判断。\nPM关注：阈值不是越高越好，要平衡自动化率和错误风险。\n技术实现：置信度阈值、风险标签、规则引擎、人工审核。\n做不好会出现：低置信问题被直接回答，或大量可自动处理问题都转人工。",
+      },
+      {
+        id: "answer-or-ask",
+        title: "直接回答或追问",
+        description: "高置信度直接回答，信息不足时追问必要字段。",
+        nodeType: "output",
+        details: "做什么：向用户给出答案、追问或下一步引导。\nPM关注：追问要短、明确、必要，避免像审问用户。\n技术实现：追问策略、答案模板、状态保存。\n做不好会出现：用户被反复追问，体验比人工客服更差。",
+      },
+      {
+        id: "handoff",
+        title: "低置信度转人工",
+        description: "不确定或高风险场景转给人工客服。",
+        nodeType: "risk",
+        details: "做什么：把会话、识别结果和已尝试答案交给人工。\nPM关注：转人工理由、等待提示、人工接管后的上下文完整性。\n技术实现：工单创建、队列分配、上下文摘要、转接状态。\n做不好会出现：用户重复说明问题，人工无法接续处理。",
+      },
+      {
+        id: "record",
+        title: "记录会话与反馈",
+        description: "沉淀会话、是否解决、人工介入和用户评价。",
+        nodeType: "database",
+        details: "做什么：记录质量、效率、转人工和知识缺口。\nPM关注：指标要区分自动解决率、错误率、转人工率和满意度。\n技术实现：会话日志、反馈表、质检样本、知识库待更新项。\n做不好会出现：系统无法持续优化，也无法证明客服效率是否提升。",
+      },
+    ],
+    edges: [
+      { id: "e1", source: "consult", target: "intent", label: "理解" },
+      { id: "e2", source: "intent", target: "knowledge", label: "检索" },
+      { id: "e3", source: "knowledge", target: "candidate", label: "生成" },
+      { id: "e4", source: "candidate", target: "confidence", label: "判断" },
+      { id: "e5", source: "confidence", target: "answer-or-ask", label: "高置信" },
+      { id: "e6", source: "confidence", target: "handoff", label: "低置信" },
+      { id: "e7", source: "answer-or-ask", target: "record", label: "反馈" },
+      { id: "e8", source: "handoff", target: "record", label: "记录" },
+    ],
+  },
+};

@@ -18,6 +18,11 @@ export function LessonDetail() {
   const readingProgress = useReadingProgress();
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    setMenuOpen(false);
+  }, [lesson?.id]);
+
+  useEffect(() => {
     if (lesson) courseProgress.markVisited(lesson.stageSlug, lesson.slug);
   }, [lesson?.id]);
 

@@ -1,4 +1,4 @@
-import { Boxes, Star } from "lucide-react";
+import { Boxes, ExternalLink, Star } from "lucide-react";
 import type { ToolCategory } from "../data/types";
 
 interface ToolLibraryProps {
@@ -34,10 +34,20 @@ export function ToolLibrary({ categories, searchQuery }: ToolLibraryProps) {
               </div>
               <div className="mt-5 grid gap-3">
                 {category.tools.map((tool) => (
-                  <div key={tool.name} className="rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+                  <a
+                    key={tool.name}
+                    href={tool.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`打开 ${tool.name} 官网或首页`}
+                    className="group block rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm focus-ring dark:border-white/10 dark:bg-white/5 dark:hover:border-cyan-300/30 motion-reduce:transition-none"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-950 dark:text-white">{tool.name}</h4>
+                        <h4 className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-950 dark:text-white">
+                          {tool.name}
+                          <ExternalLink size={13} className="text-slate-400 transition group-hover:text-blue-600 dark:group-hover:text-cyan-300 motion-reduce:transition-none" aria-hidden="true" />
+                        </h4>
                         <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{tool.purpose}</p>
                       </div>
                       <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-600 dark:bg-white/10 dark:text-slate-300">
@@ -46,7 +56,7 @@ export function ToolLibrary({ categories, searchQuery }: ToolLibraryProps) {
                       </span>
                     </div>
                     <p className="mt-3 text-xs leading-6 text-slate-600 dark:text-slate-300">{tool.usage}</p>
-                  </div>
+                  </a>
                 ))}
               </div>
             </article>

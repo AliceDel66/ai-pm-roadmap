@@ -1,0 +1,80 @@
+import type { StepsAnimationDefinition } from "../../components/animations/animationTypes";
+
+export const commercializationFunnel: StepsAnimationDefinition = {
+  id: "commercialization-funnel",
+  type: "steps",
+  title: "AI SaaS 商业化漏斗",
+  description: "用教学案例展示从访问、体验、触达限制到付费和续费的商业化分析链路。",
+  tags: ["商业化", "漏斗", "SaaS"],
+  why: "免费开源课程也需要讲商业化知识，学习者要理解商业产品如何验证价值、定价、转化和留存。",
+  hint: "这只是商业化教学模型，不代表本站会变成付费系统。",
+  data: {
+    autoPlay: false,
+    interval: 4500,
+    steps: [
+      {
+        id: "visit",
+        title: "访问官网",
+        description: "用户通过搜索、内容、推荐或广告进入产品官网。",
+        example: "一个团队负责人看到“用 AI 自动整理会议纪要”的案例，点击进入产品页面。",
+        pmNote: "要关注访问来源、落地页匹配度和首屏是否让目标用户理解产品解决什么问题。",
+      },
+      {
+        id: "value",
+        title: "理解产品价值",
+        description: "用户判断产品是否和自己的任务、痛点和预算相关。",
+        example: "页面用具体任务说明：上传录音后自动生成摘要、待办和责任人。",
+        pmNote: "价值表达要具体，不要只写“提升效率”“AI 赋能”。",
+      },
+      {
+        id: "trial",
+        title: "体验免费功能",
+        description: "用户用低门槛功能验证产品是否有用。",
+        example: "免费体验 3 次会议纪要生成，用户可以看到完整结果但有次数限制。",
+        pmNote: "免费体验要让用户感知核心价值，同时控制成本和滥用风险。",
+      },
+      {
+        id: "limit",
+        title: "触达付费限制",
+        description: "用户遇到次数、容量、协作、导出或高级模型等限制。",
+        example: "团队想导出 Word 并邀请成员协作时，看到需要升级套餐。",
+        pmNote: "限制要和价值相关，不能把基础体验切得过碎，否则用户会觉得被打断。",
+      },
+      {
+        id: "pricing",
+        title: "查看价格页",
+        description: "用户比较套餐权益、价格和适用场景。",
+        example: "个人版适合轻量使用，团队版包含成员席位、共享空间和更高调用额度。",
+        pmNote: "价格页要清楚解释权益差异、成本边界和常见问题，减少购买前不确定。",
+      },
+      {
+        id: "plan",
+        title: "选择套餐",
+        description: "用户根据团队规模、使用频次和关键功能选择套餐。",
+        example: "5 人团队选择团队版，因为需要共享知识库和统一账单。",
+        pmNote: "套餐设计要避免过度复杂，核心差异最好围绕用户规模、能力和服务边界。",
+      },
+      {
+        id: "pay",
+        title: "完成支付",
+        description: "用户完成购买或提交采购流程。",
+        example: "个人用户直接支付，企业用户可能需要发票、合同和审批。",
+        pmNote: "支付流程要关注失败提示、权益开通、退款规则和财务合规。",
+      },
+      {
+        id: "use",
+        title: "持续使用",
+        description: "用户在日常任务中持续获得价值。",
+        example: "团队每周固定用产品整理例会纪要，并在项目管理工具中同步待办。",
+        pmNote: "商业化不是支付结束，留存依赖真实使用频次、协作价值和质量稳定性。",
+      },
+      {
+        id: "renew",
+        title: "续费或升级",
+        description: "用户因为持续价值、更多成员或更高额度选择续费升级。",
+        example: "团队从 5 人扩展到 20 人，升级到更高套餐并开启权限管理。",
+        pmNote: "要用数据判断续费风险，包括活跃度、成功任务数、成本、满意度和客服反馈。",
+      },
+    ],
+  },
+};

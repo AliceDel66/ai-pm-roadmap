@@ -1,11 +1,11 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 const root = process.cwd();
-const courseDir = path.join(root, 'content', 'course');
-const projectsDir = path.join(root, 'content', 'projects');
-const templatesDir = path.join(root, 'content', 'templates');
-const glossaryDir = path.join(root, 'content', 'glossary');
+const courseDir = path.join(root, "content", "course");
+const projectsDir = path.join(root, "content", "projects");
+const templatesDir = path.join(root, "content", "templates");
+const glossaryDir = path.join(root, "content", "glossary");
 
 const lessonMinimum = 5300;
 const projectLessonMinimum = 7600;
@@ -21,20 +21,20 @@ function listMarkdownFiles(dir) {
     const filePath = path.join(dir, name);
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) result.push(...listMarkdownFiles(filePath));
-    if (stat.isFile() && name.endsWith('.md')) result.push(filePath);
+    if (stat.isFile() && name.endsWith(".md")) result.push(filePath);
   }
-  return result.sort((a, b) => a.localeCompare(b, 'zh-CN'));
+  return result.sort((a, b) => a.localeCompare(b, "zh-CN"));
 }
 
 function splitMarkdown(raw) {
   const match = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
-  if (!match) return { frontmatter: '', body: raw };
+  if (!match) return { frontmatter: "", body: raw };
   return { frontmatter: match[0].trimEnd(), body: raw.slice(match[0].length) };
 }
 
-function frontmatterValue(frontmatter, key, fallback = '') {
-  const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
-  return match ? match[1].trim().replace(/^['"]|['"]$/g, '') : fallback;
+function frontmatterValue(frontmatter, key, fallback = "") {
+  const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, "m"));
+  return match ? match[1].trim().replace(/^['"]|['"]$/g, "") : fallback;
 }
 
 function chineseCount(text) {
@@ -42,13 +42,13 @@ function chineseCount(text) {
 }
 
 function writeMarkdown(filePath, frontmatter, body) {
-  fs.writeFileSync(filePath, `${frontmatter}\n\n${body.trim()}\n`, 'utf8');
+  fs.writeFileSync(filePath, `${frontmatter}\n\n${body.trim()}\n`, "utf8");
 }
 
 function stageNameFromPath(filePath) {
   const parts = filePath.split(path.sep);
   const stagePart = parts.find((part) => /^stage-\d+/.test(part));
-  return stagePart || '';
+  return stagePart || "";
 }
 
 function stageOrder(stageSlug) {
@@ -58,173 +58,197 @@ function stageOrder(stageSlug) {
 
 function scenarioFor(title, stageSlug) {
   const titleText = title.toLowerCase();
-  if (title.includes('用户调研')) return {
-    product: 'AI 智能客服',
-    user: '客服主管、一线客服和高频咨询用户',
-    task: '找到重复咨询、知识查询、人工转接和质检复盘中的真实阻塞点',
-    data: '访谈记录、工单样本、客服会话、知识库命中情况',
-    output: '用户访谈提纲、痛点机会表和 AI 介入点判断表',
-    risk: '用户把想象中的功能当成需求，忽略错误回答、权限和人工兜底'
-  };
-  if (title.includes('需求')) return {
-    product: '企业知识库问答系统',
-    user: '门店员工、运营专员、制度维护者和客服培训负责人',
-    task: '把分散制度查询转化为可验收的问答需求和版本范围',
-    data: '制度文档、问题日志、用户角色、权限规则、历史问答反馈',
-    output: '需求分层表、MVP 范围、验收标准和优先级说明',
-    risk: '把“接入大模型”写成需求，缺少可验证的业务目标和边界'
-  };
-  if (title.includes('竞品')) return {
-    product: 'AI 写作助手',
-    user: '内容运营、市场同学、产品经理和团队负责人',
-    task: '比较竞品如何降低输入门槛、控制输出质量并沉淀模板',
-    data: '竞品流程截图、功能清单、价格策略、输出样例、用户评价',
-    output: '竞品分析报告、机会点矩阵和差异化策略',
-    risk: '只抄功能，不分析场景、用户任务、模型能力和商业约束'
-  };
-  if (title.includes('PRD')) return {
-    product: 'AI 聊天助手',
-    user: '职场用户、管理员、研发、算法和测试同学',
-    task: '把模糊 AI 想法写成研发能实现、测试能验收的产品文档',
-    data: '用户流程、输入字段、输出格式、异常分支、日志和指标定义',
-    output: 'AI 产品 PRD、验收用例、Prompt 规则和数据埋点表',
-    risk: '只写页面，不写模型输入输出、失败兜底、成本和内容安全'
-  };
-  if (title.includes('原型') || title.includes('流程')) return {
-    product: 'AI 图片生成平台',
-    user: '设计师、运营、商家和内容审核人员',
-    task: '把生图任务从输入、排队、生成、编辑、下载到审核完整串起来',
-    data: '页面状态、任务状态、参数配置、失败原因、审核结果和用户反馈',
-    output: '用户流程图、低保真原型、页面状态表和异常流程说明',
-    risk: '只画漂亮页面，不说明等待、失败、重试、计费和安全状态'
-  };
-  if (title.includes('项目管理')) return {
-    product: 'AI Agent 工作流平台',
-    user: '业务负责人、产品经理、研发、算法、测试和运营',
-    task: '管理包含模型、工具、数据和权限的复杂交付过程',
-    data: '里程碑、依赖项、接口清单、风险清单、验收结果和线上反馈',
-    output: '项目计划、风险看板、协作纪要和上线验收表',
-    risk: '把 AI 项目当普通页面项目推进，忽略模型不确定性和数据准备周期'
-  };
-  if (title.includes('LLM')) return {
-    product: '通用 AI 助手',
-    user: '业务用户、产品团队和研发团队',
-    task: '理解大语言模型能做什么、不能做什么以及如何产品化',
-    data: '用户输入、上下文、模型输出、反馈、成本和安全记录',
-    output: '模型能力边界说明、场景适配表和评估用例',
-    risk: '把模型当确定性系统，忽略幻觉、上下文限制和安全边界'
-  };
-  if (title.includes('Prompt')) return {
-    product: 'AI 写作与客服助手',
-    user: '内容运营、客服、Prompt 维护者和业务审核人',
-    task: '把业务目标转化为稳定可复用的提示词规则',
-    data: '任务说明、输入字段、输出格式、示例、失败样例和反馈',
-    output: 'Prompt 模板、测试样例、版本记录和效果评估表',
-    risk: '把 Prompt 当一句咒语，不做结构、样例、约束和版本管理'
-  };
-  if (title.includes('Token') || title.includes('上下文')) return {
-    product: '长文档总结助手',
-    user: '研究员、运营分析师、法务和产品经理',
-    task: '在上下文长度、成本、速度和结果质量之间做取舍',
-    data: '文档长度、历史对话、检索片段、输出字数和模型价格',
-    output: '上下文策略、截断规则、成本估算表和套餐设计建议',
-    risk: '无限堆历史和资料，导致成本升高、速度变慢、关键信息被挤出'
-  };
-  if (title.includes('Embedding') || title.includes('向量')) return {
-    product: '企业知识库问答系统',
-    user: '员工、知识库管理员、研发和运营',
-    task: '让系统能从大量文档中找出和问题语义相关的内容',
-    data: '知识文档、切片、向量索引、用户问题、检索结果和引用来源',
-    output: '知识库结构、切片策略、检索评估表和引用展示规则',
-    risk: '以为向量检索等于准确答案，不评估召回、噪声和权限'
-  };
-  if (title.includes('RAG') || title.includes('知识库')) return {
-    product: '企业制度问答系统',
-    user: '门店员工、HR、财务、运营和知识库管理员',
-    task: '把检索到的可信资料和大模型生成结合起来回答业务问题',
-    data: '文档、切片、向量库、检索结果、引用、回答和反馈',
-    output: 'RAG 产品方案、知识治理规则、回答验收标准和反馈闭环',
-    risk: '只接模型不治理知识，导致答案没有来源、过期或越权'
-  };
-  if (title.includes('Agent')) return {
-    product: 'AI Agent 自动化工作流',
-    user: '运营、销售、客服主管、管理员和风险审核人',
-    task: '让 AI 在规则约束下调用工具完成多步骤任务',
-    data: '任务目标、工具权限、执行日志、状态、失败原因和人工审批记录',
-    output: 'Agent 工作流图、工具权限表、失败兜底和验收用例',
-    risk: '让 Agent 自动执行高风险动作，却没有权限、审计和人工确认'
-  };
-  if (title.includes('评估')) return {
-    product: 'AI 客服质检系统',
-    user: '客服主管、运营、算法、测试和产品经理',
-    task: '判断 AI 回答是否准确、有用、安全并可持续优化',
-    data: '标准答案、真实问题、模型输出、用户反馈、人工标注和指标看板',
-    output: '评估集、评分标准、上线门槛和迭代看板',
-    risk: '只看主观感觉，不建立样本、标准、指标和回归测试'
-  };
-  if (title.includes('API') || title.includes('接口')) return {
-    product: 'AI 能力开放平台',
-    user: '前端、后端、算法、产品和测试同学',
-    task: '把产品规则翻译成稳定的接口入参、出参、错误码和日志字段',
-    data: '接口文档、调用样例、鉴权方式、错误码、限流规则和成本字段',
-    output: '接口协作清单、字段说明、验收样例和异常处理规则',
-    risk: '只说“调用接口”，不定义状态、错误、日志、权限和安全边界'
-  };
-  if (title.includes('流式')) return {
-    product: 'AI 对话与生成工具',
-    user: '终端用户、前端研发、后端研发和测试同学',
-    task: '让生成过程可感知、可中断、可重试并能正确记录状态',
-    data: '流式片段、生成状态、停止信号、错误事件、耗时和 Token 用量',
-    output: '流式交互说明、状态机、异常提示和前后端验收标准',
-    risk: '只追求“像打字一样出现”，不处理断流、重复、停止和计费'
-  };
-  if (title.includes('数据') || title.includes('指标')) return {
-    product: 'AI 产品运营看板',
-    user: '产品经理、运营、管理者和算法团队',
-    task: '用指标判断 AI 功能是否真的提升业务结果',
-    data: '使用次数、成功率、采纳率、满意度、成本、风险和留存',
-    output: '指标字典、埋点表、看板结构和迭代结论',
-    risk: '只看调用量，不看质量、成本、风险和真实业务贡献'
-  };
-  if (title.includes('成本')) return {
-    product: 'AI SaaS 商业化系统',
-    user: '产品经理、财务、运营、销售和技术负责人',
-    task: '让模型成本可预估、可控制、可分摊并能支撑定价',
-    data: 'Token 用量、模型价格、缓存命中、用户套餐、毛利和调用日志',
-    output: '成本模型、定价建议、限额规则和降本策略',
-    risk: '只追求效果，不计算单次调用成本、峰值成本和商业毛利'
-  };
-  if (title.includes('安全') || title.includes('合规') || title.includes('风险')) return {
-    product: 'AI 内容安全与风控系统',
-    user: '普通用户、审核员、法务、运营和安全负责人',
-    task: '识别 AI 产品中的隐私、越权、幻觉、违规和错误执行风险',
-    data: '敏感词、风险问题、输出内容、权限、审核记录和申诉反馈',
-    output: '风险清单、审核策略、拦截规则、告警流程和验收标准',
-    risk: '上线后才处理安全问题，导致用户信任、合规和品牌风险'
-  };
-  if (stageSlug.includes('stage-06')) return {
-    product: '完整 AI 产品作品集项目',
-    user: '目标业务用户、项目评审者、研发团队和未来面试官',
-    task: '把课程知识组合成一套可以展示的完整产品方案',
-    data: '用户痛点、竞品信息、PRD、流程图、Prompt、指标和复盘',
-    output: '项目说明页、PRD 片段、原型说明、技术协作清单和作品集展示',
-    risk: '项目只停留在功能介绍，缺少业务背景、决策过程和可验证结果'
-  };
-  if (stageSlug.includes('stage-07')) return {
-    product: 'AI 产品商业化与职业发展项目',
-    user: '产品负责人、增长团队、销售、客户成功和面试官',
-    task: '把 AI 功能从可用推进到可增长、可收费、可持续运营',
-    data: '用户分层、转化、留存、成本、收入、风险和项目案例',
-    output: '商业化方案、增长实验、指标体系、成本优化和面试作品集',
-    risk: '只会讲功能，不会讲业务价值、商业约束和长期迭代'
-  };
+  if (title.includes("用户调研"))
+    return {
+      product: "AI 智能客服",
+      user: "客服主管、一线客服和高频咨询用户",
+      task: "找到重复咨询、知识查询、人工转接和质检复盘中的真实阻塞点",
+      data: "访谈记录、工单样本、客服会话、知识库命中情况",
+      output: "用户访谈提纲、痛点机会表和 AI 介入点判断表",
+      risk: "用户把想象中的功能当成需求，忽略错误回答、权限和人工兜底",
+    };
+  if (title.includes("需求"))
+    return {
+      product: "企业知识库问答系统",
+      user: "门店员工、运营专员、制度维护者和客服培训负责人",
+      task: "把分散制度查询转化为可验收的问答需求和版本范围",
+      data: "制度文档、问题日志、用户角色、权限规则、历史问答反馈",
+      output: "需求分层表、MVP 范围、验收标准和优先级说明",
+      risk: "把“接入大模型”写成需求，缺少可验证的业务目标和边界",
+    };
+  if (title.includes("竞品"))
+    return {
+      product: "AI 写作助手",
+      user: "内容运营、市场同学、产品经理和团队负责人",
+      task: "比较竞品如何降低输入门槛、控制输出质量并沉淀模板",
+      data: "竞品流程截图、功能清单、价格策略、输出样例、用户评价",
+      output: "竞品分析报告、机会点矩阵和差异化策略",
+      risk: "只抄功能，不分析场景、用户任务、模型能力和商业约束",
+    };
+  if (title.includes("PRD"))
+    return {
+      product: "AI 聊天助手",
+      user: "职场用户、管理员、研发、算法和测试同学",
+      task: "把模糊 AI 想法写成研发能实现、测试能验收的产品文档",
+      data: "用户流程、输入字段、输出格式、异常分支、日志和指标定义",
+      output: "AI 产品 PRD、验收用例、Prompt 规则和数据埋点表",
+      risk: "只写页面，不写模型输入输出、失败兜底、成本和内容安全",
+    };
+  if (title.includes("原型") || title.includes("流程"))
+    return {
+      product: "AI 图片生成平台",
+      user: "设计师、运营、商家和内容审核人员",
+      task: "把生图任务从输入、排队、生成、编辑、下载到审核完整串起来",
+      data: "页面状态、任务状态、参数配置、失败原因、审核结果和用户反馈",
+      output: "用户流程图、低保真原型、页面状态表和异常流程说明",
+      risk: "只画漂亮页面，不说明等待、失败、重试、计费和安全状态",
+    };
+  if (title.includes("项目管理"))
+    return {
+      product: "AI Agent 工作流平台",
+      user: "业务负责人、产品经理、研发、算法、测试和运营",
+      task: "管理包含模型、工具、数据和权限的复杂交付过程",
+      data: "里程碑、依赖项、接口清单、风险清单、验收结果和线上反馈",
+      output: "项目计划、风险看板、协作纪要和上线验收表",
+      risk: "把 AI 项目当普通页面项目推进，忽略模型不确定性和数据准备周期",
+    };
+  if (title.includes("LLM"))
+    return {
+      product: "通用 AI 助手",
+      user: "业务用户、产品团队和研发团队",
+      task: "理解大语言模型能做什么、不能做什么以及如何产品化",
+      data: "用户输入、上下文、模型输出、反馈、成本和安全记录",
+      output: "模型能力边界说明、场景适配表和评估用例",
+      risk: "把模型当确定性系统，忽略幻觉、上下文限制和安全边界",
+    };
+  if (title.includes("Prompt"))
+    return {
+      product: "AI 写作与客服助手",
+      user: "内容运营、客服、Prompt 维护者和业务审核人",
+      task: "把业务目标转化为稳定可复用的提示词规则",
+      data: "任务说明、输入字段、输出格式、示例、失败样例和反馈",
+      output: "Prompt 模板、测试样例、版本记录和效果评估表",
+      risk: "把 Prompt 当一句咒语，不做结构、样例、约束和版本管理",
+    };
+  if (title.includes("Token") || title.includes("上下文"))
+    return {
+      product: "长文档总结助手",
+      user: "研究员、运营分析师、法务和产品经理",
+      task: "在上下文长度、成本、速度和结果质量之间做取舍",
+      data: "文档长度、历史对话、检索片段、输出字数和模型价格",
+      output: "上下文策略、截断规则、成本估算表和套餐设计建议",
+      risk: "无限堆历史和资料，导致成本升高、速度变慢、关键信息被挤出",
+    };
+  if (title.includes("Embedding") || title.includes("向量"))
+    return {
+      product: "企业知识库问答系统",
+      user: "员工、知识库管理员、研发和运营",
+      task: "让系统能从大量文档中找出和问题语义相关的内容",
+      data: "知识文档、切片、向量索引、用户问题、检索结果和引用来源",
+      output: "知识库结构、切片策略、检索评估表和引用展示规则",
+      risk: "以为向量检索等于准确答案，不评估召回、噪声和权限",
+    };
+  if (title.includes("RAG") || title.includes("知识库"))
+    return {
+      product: "企业制度问答系统",
+      user: "门店员工、HR、财务、运营和知识库管理员",
+      task: "把检索到的可信资料和大模型生成结合起来回答业务问题",
+      data: "文档、切片、向量库、检索结果、引用、回答和反馈",
+      output: "RAG 产品方案、知识治理规则、回答验收标准和反馈闭环",
+      risk: "只接模型不治理知识，导致答案没有来源、过期或越权",
+    };
+  if (title.includes("Agent"))
+    return {
+      product: "AI Agent 自动化工作流",
+      user: "运营、销售、客服主管、管理员和风险审核人",
+      task: "让 AI 在规则约束下调用工具完成多步骤任务",
+      data: "任务目标、工具权限、执行日志、状态、失败原因和人工审批记录",
+      output: "Agent 工作流图、工具权限表、失败兜底和验收用例",
+      risk: "让 Agent 自动执行高风险动作，却没有权限、审计和人工确认",
+    };
+  if (title.includes("评估"))
+    return {
+      product: "AI 客服质检系统",
+      user: "客服主管、运营、算法、测试和产品经理",
+      task: "判断 AI 回答是否准确、有用、安全并可持续优化",
+      data: "标准答案、真实问题、模型输出、用户反馈、人工标注和指标看板",
+      output: "评估集、评分标准、上线门槛和迭代看板",
+      risk: "只看主观感觉，不建立样本、标准、指标和回归测试",
+    };
+  if (title.includes("API") || title.includes("接口"))
+    return {
+      product: "AI 能力开放平台",
+      user: "前端、后端、算法、产品和测试同学",
+      task: "把产品规则翻译成稳定的接口入参、出参、错误码和日志字段",
+      data: "接口文档、调用样例、鉴权方式、错误码、限流规则和成本字段",
+      output: "接口协作清单、字段说明、验收样例和异常处理规则",
+      risk: "只说“调用接口”，不定义状态、错误、日志、权限和安全边界",
+    };
+  if (title.includes("流式"))
+    return {
+      product: "AI 对话与生成工具",
+      user: "终端用户、前端研发、后端研发和测试同学",
+      task: "让生成过程可感知、可中断、可重试并能正确记录状态",
+      data: "流式片段、生成状态、停止信号、错误事件、耗时和 Token 用量",
+      output: "流式交互说明、状态机、异常提示和前后端验收标准",
+      risk: "只追求“像打字一样出现”，不处理断流、重复、停止和计费",
+    };
+  if (title.includes("数据") || title.includes("指标"))
+    return {
+      product: "AI 产品运营看板",
+      user: "产品经理、运营、管理者和算法团队",
+      task: "用指标判断 AI 功能是否真的提升业务结果",
+      data: "使用次数、成功率、采纳率、满意度、成本、风险和留存",
+      output: "指标字典、埋点表、看板结构和迭代结论",
+      risk: "只看调用量，不看质量、成本、风险和真实业务贡献",
+    };
+  if (title.includes("成本"))
+    return {
+      product: "AI SaaS 商业化系统",
+      user: "产品经理、财务、运营、销售和技术负责人",
+      task: "让模型成本可预估、可控制、可分摊并能支撑定价",
+      data: "Token 用量、模型价格、缓存命中、用户套餐、毛利和调用日志",
+      output: "成本模型、定价建议、限额规则和降本策略",
+      risk: "只追求效果，不计算单次调用成本、峰值成本和商业毛利",
+    };
+  if (
+    title.includes("安全") ||
+    title.includes("合规") ||
+    title.includes("风险")
+  )
+    return {
+      product: "AI 内容安全与风控系统",
+      user: "普通用户、审核员、法务、运营和安全负责人",
+      task: "识别 AI 产品中的隐私、越权、幻觉、违规和错误执行风险",
+      data: "敏感词、风险问题、输出内容、权限、审核记录和申诉反馈",
+      output: "风险清单、审核策略、拦截规则、告警流程和验收标准",
+      risk: "上线后才处理安全问题，导致用户信任、合规和品牌风险",
+    };
+  if (stageSlug.includes("stage-06"))
+    return {
+      product: "完整 AI 产品作品集项目",
+      user: "目标业务用户、项目评审者、研发团队和未来面试官",
+      task: "把课程知识组合成一套可以展示的完整产品方案",
+      data: "用户痛点、竞品信息、PRD、流程图、Prompt、指标和复盘",
+      output: "项目说明页、PRD 片段、原型说明、技术协作清单和作品集展示",
+      risk: "项目只停留在功能介绍，缺少业务背景、决策过程和可验证结果",
+    };
+  if (stageSlug.includes("stage-07"))
+    return {
+      product: "AI 产品商业化与职业发展项目",
+      user: "产品负责人、增长团队、销售、客户成功和面试官",
+      task: "把 AI 功能从可用推进到可增长、可收费、可持续运营",
+      data: "用户分层、转化、留存、成本、收入、风险和项目案例",
+      output: "商业化方案、增长实验、指标体系、成本优化和面试作品集",
+      risk: "只会讲功能，不会讲业务价值、商业约束和长期迭代",
+    };
   return {
-    product: 'AI 产品学习项目',
-    user: '学习者、产品经理、研发和业务方',
+    product: "AI 产品学习项目",
+    user: "学习者、产品经理、研发和业务方",
     task: `理解并应用“${title}”到真实 AI 产品项目`,
-    data: '用户场景、输入输出、业务规则、反馈样本、指标和风险记录',
+    data: "用户场景、输入输出、业务规则、反馈样本、指标和风险记录",
     output: `${title} 学习笔记、方法清单和作品集材料`,
-    risk: '只记概念，不知道如何写进 PRD、流程图、验收标准和复盘'
+    risk: "只记概念，不知道如何写进 PRD、流程图、验收标准和复盘",
   };
 }
 
@@ -345,14 +369,32 @@ function ensureChineseLength(body, min, title, scenario) {
     `进一步看，产品经理还要把用户语言翻译成团队语言。用户会说“我希望 AI 更懂我”，业务方会说“希望降低人力”，研发会问“输入字段和异常状态是什么”，算法会问“有没有标准样本和评估口径”。学习“${title}”的关键，就是把这些话统一到同一张需求图上。`,
     `在作品集表达中，建议不要只放最终结论。更有说服力的做法是展示你的推理过程：为什么选择这个场景，为什么第一版只做这些能力，哪些需求暂缓，哪些风险必须前置，哪些指标用于判断上线后是否真的有效。`,
     `如果你在练习中没有真实公司数据，可以构造一个可信的业务背景，但要让数字和流程自洽。例如用户规模、咨询频次、文档数量、人工处理时长、错误成本、模型调用成本和目标指标，都要能支撑你的产品取舍。`,
-    `最后要记住，AI 产品经理的价值不是把所有地方都接上模型，而是判断哪些任务值得交给 AI，哪些任务需要人机协作，哪些任务必须保留人工审批。这个判断能力，正是“${title}”需要训练出来的核心能力。`
+    `最后要记住，AI 产品经理的价值不是把所有地方都接上模型，而是判断哪些任务值得交给 AI，哪些任务需要人机协作，哪些任务必须保留人工审批。这个判断能力，正是“${title}”需要训练出来的核心能力。`,
+    `做方案评审时，可以把“用户任务、AI 介入点、技术依赖、质量指标、风险兜底”放在同一张表里。这样业务方能看到价值，研发能看到实现范围，算法能看到样本和评估，测试能看到验收边界。`,
+    `如果要继续深化本节内容，可以补一组真实样本：3 个典型输入、3 个边界输入、3 个失败输入。然后逐条说明系统应该如何处理，哪些结果可以自动给出，哪些必须提示不确定或转人工。`,
+    `从长期运营看，AI 产品需要持续维护 Prompt、知识、模板、指标和风险规则。产品经理要提前设计谁能配置、如何灰度、如何回滚、如何记录版本，否则上线后的每次调整都会变成临时救火。`,
+    `在技术协作中，不要只问“能不能实现”。更有效的问题是：数据从哪里来，接口如何返回，异常如何提示，日志如何追踪，成本如何统计，权限如何隔离，测试样本如何准备。`,
+    `在学习复盘时，可以用三句话检查自己是否真正掌握：我能说清它解决的用户任务；我能写出它影响的产品规则；我能列出研发、算法、运营需要一起确认的问题。`,
+    `如果把本节内容放进面试作品集，建议展示一页“取舍说明”。写清为什么第一版只做这些能力，为什么暂缓某些高级功能，以及如果指标不达标下一步如何调整。`,
+    `衡量 AI 产品方案是否成熟，不是看概念是否复杂，而是看它能否被验证。一个好的方案应该能回答：谁使用、怎么用、输出什么、怎么算好、失败怎么办、成本是否可接受。`,
+    `做练习时，可以补一组最小闭环材料：一个用户画像、一个核心任务、一条主流程、一张输入输出表、一组异常状态和三个验收指标。只要这些材料能互相对应，方案就不会停在概念层面。`,
+    `如果上线后指标不达标，产品经理不要只归因于模型不好。要分别检查输入是否过空、上下文是否缺失、知识是否过期、Prompt 是否约束不足、页面反馈是否清晰，以及用户是否知道如何使用结果。`,
+    `和设计协作时，要关注用户在等待、失败、不确定和高风险场景下看到什么。AI 产品的信任感往往来自状态解释、引用来源、可撤回操作和明确边界，而不是更炫的视觉效果。`,
+    `和测试协作时，要把正常样本、边界样本、恶意样本、缺失输入、超长输入和权限不足都写进验收用例。AI 功能不能只测“能不能返回结果”，还要测“返回结果是否可控”。`,
+    `和运营协作时，要说明哪些内容可以配置、哪些反馈要进入看板、哪些失败样本要进入评估集、哪些模板需要定期复盘。AI 产品上线后需要持续运营，不能完全依赖一次性开发。`,
+    `从商业角度看，还要评估单次任务价值是否覆盖模型、存储、审核和人工兜底成本。如果用户只愿意为最终结果付费，产品方案就必须证明 AI 输出能稳定进入业务流程。`,
   ];
   let result = body;
-  let index = 0;
-  if (chineseCount(result) < min) result += `\n\n## 深度补充：把本节内容用于真实项目\n`;
-  while (chineseCount(result) < min) {
-    result += `\n\n${paragraphs[index % paragraphs.length]}`;
-    index += 1;
+  if (result.includes("## 深度补充：把本节内容用于真实项目")) {
+    result = result
+      .replace(/\n*## 深度补充：把本节内容用于真实项目[\s\S]*$/m, "")
+      .trimEnd();
+  }
+  if (chineseCount(result) < min)
+    result += `\n\n## 深度补充：把本节内容用于真实项目\n`;
+  for (const paragraph of paragraphs) {
+    if (chineseCount(result) >= min) break;
+    result += `\n\n${paragraph}`;
   }
   return result;
 }
@@ -360,9 +402,14 @@ function ensureChineseLength(body, min, title, scenario) {
 function generateCourseLesson(title, filePath) {
   const stageSlug = stageNameFromPath(filePath);
   const scenario = scenarioFor(title, stageSlug);
-  const isStageProject = filePath.includes('stage-project') || title.includes('阶段项目');
-  const isProjectStage = stageSlug.includes('stage-06');
-  const min = isProjectStage ? projectLessonMinimum : isStageProject ? stageProjectMinimum : lessonMinimum;
+  const isStageProject =
+    filePath.includes("stage-project") || title.includes("阶段项目");
+  const isProjectStage = stageSlug.includes("stage-06");
+  const min = isProjectStage
+    ? projectLessonMinimum
+    : isStageProject
+      ? stageProjectMinimum
+      : lessonMinimum;
   let body = `# ${title}
 
 ## 你将学到什么
@@ -419,7 +466,7 @@ AI 能力可以这样介入：先接收用户输入和上下文，再结合 ${sc
 
 页面或流程设计可以分为四步：第一步，用户选择任务或模板，降低表达成本；第二步，系统要求补充必要字段，避免输入过空；第三步，AI 输出结果并展示依据、风险提示或下一步动作；第四步，用户反馈结果是否可用，系统把反馈进入运营和评估闭环。技术协作要确认接口、模型、Prompt、上下文、权限、日志、成本和安全策略。效果评估则至少看采纳率、完成时长、人工介入率、错误率、满意度和单次成本。
 
-${imagePlaceholder(`${title} 场景拆解图`, `${path.basename(filePath, '.md')}-scenario-map.png`, `用于展示“${title}”在真实 AI 产品项目中的用户、任务、AI 介入点和评估闭环。`, `生成一张现代科技教育风的 AI 产品场景拆解图，主题是“${title}”。画面包含目标用户、当前任务、痛点阻塞、AI 介入点、页面流程、技术协作、数据指标和作品集产出。白色背景，蓝紫渐变线条，中文标签清晰，16:9，无水印，无真实品牌 Logo。`)}
+${imagePlaceholder(`${title} 场景拆解图`, `${path.basename(filePath, ".md")}-scenario-map.png`, `用于展示“${title}”在真实 AI 产品项目中的用户、任务、AI 介入点和评估闭环。`, `生成一张现代科技教育风的 AI 产品场景拆解图，主题是“${title}”。画面包含目标用户、当前任务、痛点阻塞、AI 介入点、页面流程、技术协作、数据指标和作品集产出。白色背景，蓝紫渐变线条，中文标签清晰，16:9，无水印，无真实品牌 Logo。`)}
 
 ## 方法论
 
@@ -497,7 +544,12 @@ ${quizBlock(title)}
 function generateStageIndex(title, filePath, lessons) {
   const stageSlug = stageNameFromPath(filePath);
   const order = stageOrder(stageSlug);
-  const lessonRows = lessons.map((lesson, index) => `| ${index + 1} | ${lesson.title} | 解决“${lesson.title}”在 AI 产品项目中如何理解、如何操作、如何产出作品集材料的问题 |`).join('\n');
+  const lessonRows = lessons
+    .map(
+      (lesson, index) =>
+        `| ${index + 1} | ${lesson.title} | 解决“${lesson.title}”在 AI 产品项目中如何理解、如何操作、如何产出作品集材料的问题 |`,
+    )
+    .join("\n");
   const goals = [
     `理解本阶段在 AI 产品经理完整能力路线中的位置`,
     `掌握本阶段每个核心概念的真实业务用途`,
@@ -506,7 +558,7 @@ function generateStageIndex(title, filePath, lessons) {
     `能和研发、算法、设计、测试、运营进行有效协作`,
     `能为本阶段主题设计可验证的数据指标和验收标准`,
     `能完成本阶段项目并沉淀为作品集材料`,
-    `能用自己的语言向面试官解释本阶段的关键方法和取舍`
+    `能用自己的语言向面试官解释本阶段的关键方法和取舍`,
   ];
   let body = `# ${title}
 
@@ -532,7 +584,7 @@ function generateStageIndex(title, filePath, lessons) {
 
 ## 学习目标
 
-${goals.map((goal, index) => `${index + 1}. ${goal}。`).join('\n')}
+${goals.map((goal, index) => `${index + 1}. ${goal}。`).join("\n")}
 
 ## 课程地图
 
@@ -599,73 +651,149 @@ ${lessonRows}
 
 ${imagePlaceholder(`${title} 阶段学习地图`, `${stageSlug}-learning-map.png`, `用于展示 ${title} 阶段的课程顺序、核心能力和作品集产出路径。`, `生成一张现代科技教育风的阶段学习地图，主题是“${title}”。画面包含课程路线、学习目标、核心能力、练习作业、阶段项目和作品集产出。白色背景，蓝紫渐变线条，中文标签清晰，16:9，无水印，无真实品牌 Logo。`)}
 `;
-  return ensureChineseLength(body, indexMinimum, title, scenarioFor(title, stageSlug));
+  return ensureChineseLength(
+    body,
+    indexMinimum,
+    title,
+    scenarioFor(title, stageSlug),
+  );
 }
 
 const projectConfigs = {
-  'chat-assistant.md': ['AI 聊天助手产品设计', '职场效率团队希望统一周报、会议纪要、资料总结和文案润色等高频任务，让员工不用每次重新写 Prompt。', '职场新人、内容运营、产品经理、团队管理者、模板管理员'],
-  'knowledge-rag.md': ['企业知识库问答系统', '一家 300 人连锁零售公司内部制度分散在文档、PDF、培训手册和群公告中，门店员工经常重复询问流程规则。', '门店员工、HR、财务、运营专员、知识库管理员'],
-  'image-platform.md': ['AI 图片生成平台', '一家电商团队需要快速生成商品主图、活动海报和社媒配图，但设计资源有限，风格和审核标准不稳定。', '商家运营、设计师、内容审核员、增长运营、平台管理员'],
-  'customer-service.md': ['AI 智能客服系统', '一家在线教育公司每天收到大量课程咨询、退款、发票和学习进度问题，客服重复劳动多且质检压力大。', '潜在客户、付费学员、一线客服、客服主管、运营管理员'],
-  'agent-workflow.md': ['AI Agent 自动化工作流平台', '一家 B2B 团队希望让 AI 辅助完成线索整理、客户跟进、资料生成和任务分派，但每一步都涉及权限和审核。', '销售、运营、团队负责人、流程管理员、风险审核人'],
-  'commercial-site.md': ['AI 产品官网与商业化落地', '一个 AI SaaS 项目已经有核心功能，需要通过官网、定价、转化路径和数据看板完成从产品能力到商业收入的闭环。', '潜在客户、试用用户、销售、客户成功、产品负责人']
+  "chat-assistant.md": [
+    "AI 聊天助手产品设计",
+    "职场效率团队希望统一周报、会议纪要、资料总结和文案润色等高频任务，让员工不用每次重新写 Prompt。",
+    "职场新人、内容运营、产品经理、团队管理者、模板管理员",
+  ],
+  "knowledge-rag.md": [
+    "企业知识库问答系统",
+    "一家 300 人连锁零售公司内部制度分散在文档、PDF、培训手册和群公告中，门店员工经常重复询问流程规则。",
+    "门店员工、HR、财务、运营专员、知识库管理员",
+  ],
+  "image-platform.md": [
+    "AI 图片生成平台",
+    "一家电商团队需要快速生成商品主图、活动海报和社媒配图，但设计资源有限，风格和审核标准不稳定。",
+    "商家运营、设计师、内容审核员、增长运营、平台管理员",
+  ],
+  "customer-service.md": [
+    "AI 智能客服系统",
+    "一家在线教育公司每天收到大量课程咨询、退款、发票和学习进度问题，客服重复劳动多且质检压力大。",
+    "潜在客户、付费学员、一线客服、客服主管、运营管理员",
+  ],
+  "agent-workflow.md": [
+    "AI Agent 自动化工作流平台",
+    "一家 B2B 团队希望让 AI 辅助完成线索整理、客户跟进、资料生成和任务分派，但每一步都涉及权限和审核。",
+    "销售、运营、团队负责人、流程管理员、风险审核人",
+  ],
+  "commercial-site.md": [
+    "AI 产品官网与商业化落地",
+    "一个 AI SaaS 项目已经有核心功能，需要通过官网、定价、转化路径和数据看板完成从产品能力到商业收入的闭环。",
+    "潜在客户、试用用户、销售、客户成功、产品负责人",
+  ],
 };
 
 function projectImagePlaceholders(projectTitle, base) {
   const names = [
-    ['项目总览图', 'overview', `展示 ${projectTitle} 的业务背景、目标用户、核心模块和产品闭环。`],
-    ['用户流程图', 'user-flow', `展示用户从进入产品、完成关键任务到反馈结果的完整路径。`],
-    ['产品架构图', 'architecture', `展示前端页面、后端服务、AI 能力、数据存储、日志监控和运营配置的关系。`],
-    ['页面结构图', 'page-structure', `展示主要页面、页面模块、关键交互和需要呈现的数据。`],
-    ['AI 能力链路图', 'ai-capability-chain', `展示输入处理、Prompt、检索或工具调用、模型输出、审核和反馈闭环。`],
-    ['数据指标看板图', 'metrics-dashboard', `展示使用、效果、成本、质量、风险和运营指标。`],
-    ['PRD 结构图', 'prd-structure', `展示项目 PRD 的章节结构、功能模块和验收标准。`],
-    ['作品集展示图', 'portfolio-showcase', `展示学习者如何把项目整理成作品集页面。`]
+    [
+      "项目总览图",
+      "overview",
+      `展示 ${projectTitle} 的业务背景、目标用户、核心模块和产品闭环。`,
+    ],
+    [
+      "用户流程图",
+      "user-flow",
+      `展示用户从进入产品、完成关键任务到反馈结果的完整路径。`,
+    ],
+    [
+      "产品架构图",
+      "architecture",
+      `展示前端页面、后端服务、AI 能力、数据存储、日志监控和运营配置的关系。`,
+    ],
+    [
+      "页面结构图",
+      "page-structure",
+      `展示主要页面、页面模块、关键交互和需要呈现的数据。`,
+    ],
+    [
+      "AI 能力链路图",
+      "ai-capability-chain",
+      `展示输入处理、Prompt、检索或工具调用、模型输出、审核和反馈闭环。`,
+    ],
+    [
+      "数据指标看板图",
+      "metrics-dashboard",
+      `展示使用、效果、成本、质量、风险和运营指标。`,
+    ],
+    [
+      "PRD 结构图",
+      "prd-structure",
+      `展示项目 PRD 的章节结构、功能模块和验收标准。`,
+    ],
+    [
+      "作品集展示图",
+      "portfolio-showcase",
+      `展示学习者如何把项目整理成作品集页面。`,
+    ],
   ];
-  return names.map(([name, slug, purpose]) => imagePlaceholder(`${projectTitle}${name}`, `${base}-${slug}.png`, purpose, `生成一张现代科技风的 AI 产品课程插图，主题是“${projectTitle}${name}”。画面包含业务背景、目标用户、核心流程、AI 能力、技术协作、数据指标和作品集产出等中文标签。白色背景，蓝紫色渐变线条，结构清晰，适合开源课程网站，16:9，无水印，不使用真实品牌 Logo，不使用版权人物。`)).join('\n\n');
+  return names
+    .map(([name, slug, purpose]) =>
+      imagePlaceholder(
+        `${projectTitle}${name}`,
+        `${base}-${slug}.png`,
+        purpose,
+        `生成一张现代科技风的 AI 产品课程插图，主题是“${projectTitle}${name}”。画面包含业务背景、目标用户、核心流程、AI 能力、技术协作、数据指标和作品集产出等中文标签。白色背景，蓝紫色渐变线条，结构清晰，适合开源课程网站，16:9，无水印，不使用真实品牌 Logo，不使用版权人物。`,
+      ),
+    )
+    .join("\n\n");
 }
 
 function projectChecklist() {
   return [
-    '是否已经说明项目解决的真实业务问题，而不是只写“提升效率”。',
-    '是否写清至少 5 类目标用户的角色、场景、诉求和顾虑。',
-    '是否列出足够具体的用户痛点，并说明痛点发生在哪个流程中。',
-    '是否把产品目标写成可衡量指标，而不是宽泛愿景。',
-    '是否明确 V1 做什么、不做什么，以及为什么这样取舍。',
-    '是否拆分用户侧、管理端、AI 能力、数据统计、安全权限和运营配置。',
-    '是否为每个核心页面说明页面目标、模块、交互和展示数据。',
-    '是否描述完整主流程，并覆盖失败、重试、转人工或人工确认分支。',
-    '是否写清 AI 能力的输入、输出、规则、评估和失败兜底。',
-    '是否说明 Prompt、上下文、模型、知识库或工具调用如何协同。',
-    '是否列出 API 入参出参、状态码、错误码和日志字段问题。',
-    '是否考虑流式响应、停止生成、超时、断流和部分结果保存。',
-    '是否明确模型选择依据，包括效果、成本、速度和安全。',
-    '是否设计 Prompt 版本管理、灰度、回滚和测试样例。',
-    '是否考虑上下文截断、隐私脱敏、历史保留和成本控制。',
-    '是否定义数据库需要保存的会话、结果、反馈、配置和日志。',
-    '是否考虑文件上传格式、大小、解析失败、权限和安全扫描。',
-    '是否说明向量库切片、索引、召回、重排和权限过滤策略。',
-    '是否设计不同角色的查看、编辑、导出和管理权限。',
-    '是否能按用户、场景、模板、模型和时间统计成本。',
-    '是否设计内容安全、敏感信息、违规输出和高风险问题处理。',
-    '是否有用户反馈入口，并能回流到评估集或运营看板。',
-    '是否覆盖使用指标、效果指标、成本指标、留存指标和风险指标。',
-    '是否为每个指标说明定义、采集方式、目标值和迭代动作。',
-    '是否给出足够详细的 PRD 大纲，学习者能照着扩写。',
-    '是否描述原型布局、页面状态、关键交互和异常提示。',
-    '是否提供 System Prompt、User Prompt、输出约束和兜底提示。',
-    '是否写清模型幻觉、隐私、成本、合规、越权和内容安全风险。',
-    '是否设计 V1、V2、V3 迭代方向和每个版本成功标准。',
-    '是否说明项目可以放入作品集的页面、图表、文档和复盘材料。',
-    '是否有完整项目作业，包含交付格式和评分标准。',
-    '是否包含 8 个统一格式的图片占位和中文生图提示词。'
-  ].map((item, index) => `${index + 1}. ${item}`).join('\n');
+    "是否已经说明项目解决的真实业务问题，而不是只写“提升效率”。",
+    "是否写清至少 5 类目标用户的角色、场景、诉求和顾虑。",
+    "是否列出足够具体的用户痛点，并说明痛点发生在哪个流程中。",
+    "是否把产品目标写成可衡量指标，而不是宽泛愿景。",
+    "是否明确 V1 做什么、不做什么，以及为什么这样取舍。",
+    "是否拆分用户侧、管理端、AI 能力、数据统计、安全权限和运营配置。",
+    "是否为每个核心页面说明页面目标、模块、交互和展示数据。",
+    "是否描述完整主流程，并覆盖失败、重试、转人工或人工确认分支。",
+    "是否写清 AI 能力的输入、输出、规则、评估和失败兜底。",
+    "是否说明 Prompt、上下文、模型、知识库或工具调用如何协同。",
+    "是否列出 API 入参出参、状态码、错误码和日志字段问题。",
+    "是否考虑流式响应、停止生成、超时、断流和部分结果保存。",
+    "是否明确模型选择依据，包括效果、成本、速度和安全。",
+    "是否设计 Prompt 版本管理、灰度、回滚和测试样例。",
+    "是否考虑上下文截断、隐私脱敏、历史保留和成本控制。",
+    "是否定义数据库需要保存的会话、结果、反馈、配置和日志。",
+    "是否考虑文件上传格式、大小、解析失败、权限和安全扫描。",
+    "是否说明向量库切片、索引、召回、重排和权限过滤策略。",
+    "是否设计不同角色的查看、编辑、导出和管理权限。",
+    "是否能按用户、场景、模板、模型和时间统计成本。",
+    "是否设计内容安全、敏感信息、违规输出和高风险问题处理。",
+    "是否有用户反馈入口，并能回流到评估集或运营看板。",
+    "是否覆盖使用指标、效果指标、成本指标、留存指标和风险指标。",
+    "是否为每个指标说明定义、采集方式、目标值和迭代动作。",
+    "是否给出足够详细的 PRD 大纲，学习者能照着扩写。",
+    "是否描述原型布局、页面状态、关键交互和异常提示。",
+    "是否提供 System Prompt、User Prompt、输出约束和兜底提示。",
+    "是否写清模型幻觉、隐私、成本、合规、越权和内容安全风险。",
+    "是否设计 V1、V2、V3 迭代方向和每个版本成功标准。",
+    "是否说明项目可以放入作品集的页面、图表、文档和复盘材料。",
+    "是否有完整项目作业，包含交付格式和评分标准。",
+    "是否包含 8 个统一格式的图片占位和中文生图提示词。",
+  ]
+    .map((item, index) => `${index + 1}. ${item}`)
+    .join("\n");
 }
 
 function generateProject(title, filePath) {
-  const base = path.basename(filePath, '.md');
-  const config = projectConfigs[path.basename(filePath)] || [title, `一个需要用 AI 提升效率和质量的真实业务场景。`, '业务用户、运营、管理员、产品经理、技术团队'];
-  const users = config[2].split('、');
+  const base = path.basename(filePath, ".md");
+  const config = projectConfigs[path.basename(filePath)] || [
+    title,
+    `一个需要用 AI 提升效率和质量的真实业务场景。`,
+    "业务用户、运营、管理员、产品经理、技术团队",
+  ];
+  const users = config[2].split("、");
   let body = `# ${title}
 
 ## 项目概述
@@ -686,7 +814,7 @@ ${config[1]}具体来说，业务团队目前通常依赖人工经验、分散�
 
 ## 目标用户
 
-${users.map((user, index) => `### ${index + 1}. ${user}\n\n角色：${user} 是本项目的重要使用或协作对象。使用场景：在日常工作中需要更快完成信息获取、内容生成、流程处理或结果判断。核心诉求：希望系统降低重复劳动、提升结果质量，并保留可控的人工确认。可能担心的问题：AI 是否会答错、是否泄露数据、是否增加学习成本、结果是否能被业务采纳。`).join('\n\n')}
+${users.map((user, index) => `### ${index + 1}. ${user}\n\n角色：${user} 是本项目的重要使用或协作对象。使用场景：在日常工作中需要更快完成信息获取、内容生成、流程处理或结果判断。核心诉求：希望系统降低重复劳动、提升结果质量，并保留可控的人工确认。可能担心的问题：AI 是否会答错、是否泄露数据、是否增加学习成本、结果是否能被业务采纳。`).join("\n\n")}
 
 ## 用户痛点
 
@@ -886,7 +1014,12 @@ ${projectChecklist()}
 
 ${projectImagePlaceholders(title, base)}
 `;
-  return ensureChineseLength(body, projectMinimum, title, scenarioFor(title, 'stage-06-real-projects'));
+  return ensureChineseLength(
+    body,
+    projectMinimum,
+    title,
+    scenarioFor(title, "stage-06-real-projects"),
+  );
 }
 
 function generateTemplate(title) {
@@ -998,22 +1131,32 @@ ${title} 用于帮助 AI 产品经理把复杂工作整理成可复制、可评�
 9. 是否有可复制的模板正文。
 10. 是否有 AI 产品相关填写示例。
 11. 是否能直接作为作品集材料继续打磨。`;
-  return ensureChineseLength(body, templateMinimum, title, scenarioFor(title, 'templates'));
+  return ensureChineseLength(
+    body,
+    templateMinimum,
+    title,
+    scenarioFor(title, "templates"),
+  );
 }
 
 const glossaryRelated = {
-  'LLM': ['Prompt', 'Token', 'Context Window', 'Evaluation'],
-  'Prompt': ['System Prompt', 'User Prompt', 'Prompt Injection', 'Evaluation'],
-  'Token': ['Context Window', 'Model Cost', 'Cache', 'Rate Limit'],
-  'Context Window': ['Token', 'Chunk', 'RAG', 'Retrieval'],
-  'Embedding': ['Vector Database', 'Retrieval', 'RAG', 'Chunk'],
-  'Vector Database': ['Embedding', 'Retrieval', 'RAG', 'Rerank'],
-  'RAG': ['Knowledge Base', 'Retrieval', 'Chunk', 'Rerank'],
-  'Agent': ['Tool Calling', 'Function Calling', 'Workflow', 'Guardrails']
+  LLM: ["Prompt", "Token", "Context Window", "Evaluation"],
+  Prompt: ["System Prompt", "User Prompt", "Prompt Injection", "Evaluation"],
+  Token: ["Context Window", "Model Cost", "Cache", "Rate Limit"],
+  "Context Window": ["Token", "Chunk", "RAG", "Retrieval"],
+  Embedding: ["Vector Database", "Retrieval", "RAG", "Chunk"],
+  "Vector Database": ["Embedding", "Retrieval", "RAG", "Rerank"],
+  RAG: ["Knowledge Base", "Retrieval", "Chunk", "Rerank"],
+  Agent: ["Tool Calling", "Function Calling", "Workflow", "Guardrails"],
 };
 
 function generateGlossary(term) {
-  const related = glossaryRelated[term] || ['LLM', 'Prompt', 'Evaluation', 'Guardrails'];
+  const related = glossaryRelated[term] || [
+    "LLM",
+    "Prompt",
+    "Evaluation",
+    "Guardrails",
+  ];
   const title = term;
   let body = `# ${title}
 
@@ -1065,9 +1208,14 @@ ${title} 可以先理解为 AI 产品里的一个关键零件。它不只是技�
 
 ## 相关术语
 
-${related.map((item) => `- ${item}`).join('\n')}
+${related.map((item) => `- ${item}`).join("\n")}
 `;
-  return ensureChineseLength(body, glossaryMinimum, title, scenarioFor(title, 'glossary'));
+  return ensureChineseLength(
+    body,
+    glossaryMinimum,
+    title,
+    scenarioFor(title, "glossary"),
+  );
 }
 
 function generateAuditDocument() {
@@ -1075,32 +1223,40 @@ function generateAuditDocument() {
   const projectFiles = listMarkdownFiles(projectsDir);
   const templateFiles = listMarkdownFiles(templatesDir);
   const glossaryFiles = listMarkdownFiles(glossaryDir);
-  const courseRows = courseFiles.map((file) => {
-    const raw = fs.readFileSync(file, 'utf8');
-    const { frontmatter, body } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file));
-    const rel = path.relative(root, file).replace(/\\/g, '/');
-    const isIndex = path.basename(file) === 'index.md';
-    return `| ${rel} | ${title} | ${chineseCount(body)} | ${isIndex ? '阶段首页' : '已完成'} | ${body.includes('## 本节练习') ? '是' : isIndex ? '不适用' : '否'} | ${body.includes('## 本节作业') ? '是' : isIndex ? '不适用' : '否'} | ${body.includes('## 自测题') ? '是' : isIndex ? '不适用' : '否'} | ${body.includes('答案：') && body.includes('解析：') ? '是' : isIndex ? '不适用' : '否'} |`;
-  }).join('\n');
-  const projectRows = projectFiles.map((file) => {
-    const raw = fs.readFileSync(file, 'utf8');
-    const { frontmatter, body } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file));
-    return `| ${path.relative(root, file).replace(/\\/g, '/')} | ${title} | ${chineseCount(body)} | ${(body.match(/图片占位：/g) || []).length} | 已完成 |`;
-  }).join('\n');
-  const templateRows = templateFiles.map((file) => {
-    const raw = fs.readFileSync(file, 'utf8');
-    const { frontmatter, body } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file));
-    return `| ${path.relative(root, file).replace(/\\/g, '/')} | ${title} | ${chineseCount(body)} | ${body.includes('## 模板正文') ? '是' : '否'} | ${body.includes('## 填写示例') ? '是' : '否'} | 已完成 |`;
-  }).join('\n');
-  const glossaryRows = glossaryFiles.map((file) => {
-    const raw = fs.readFileSync(file, 'utf8');
-    const { frontmatter, body } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file));
-    return `| ${path.relative(root, file).replace(/\\/g, '/')} | ${title} | ${chineseCount(body)} | ${body.includes('## 需求设计影响') ? '是' : '否'} | ${body.includes('## 技术协作问题') ? '是' : '否'} | 已完成 |`;
-  }).join('\n');
+  const courseRows = courseFiles
+    .map((file) => {
+      const raw = fs.readFileSync(file, "utf8");
+      const { frontmatter, body } = splitMarkdown(raw);
+      const title = frontmatterValue(frontmatter, "title", path.basename(file));
+      const rel = path.relative(root, file).replace(/\\/g, "/");
+      const isIndex = path.basename(file) === "index.md";
+      return `| ${rel} | ${title} | ${chineseCount(body)} | ${isIndex ? "阶段首页" : "已完成"} | ${body.includes("## 本节练习") ? "是" : isIndex ? "不适用" : "否"} | ${body.includes("## 本节作业") ? "是" : isIndex ? "不适用" : "否"} | ${body.includes("## 自测题") ? "是" : isIndex ? "不适用" : "否"} | ${body.includes("答案：") && body.includes("解析：") ? "是" : isIndex ? "不适用" : "否"} |`;
+    })
+    .join("\n");
+  const projectRows = projectFiles
+    .map((file) => {
+      const raw = fs.readFileSync(file, "utf8");
+      const { frontmatter, body } = splitMarkdown(raw);
+      const title = frontmatterValue(frontmatter, "title", path.basename(file));
+      return `| ${path.relative(root, file).replace(/\\/g, "/")} | ${title} | ${chineseCount(body)} | ${(body.match(/图片占位：/g) || []).length} | 已完成 |`;
+    })
+    .join("\n");
+  const templateRows = templateFiles
+    .map((file) => {
+      const raw = fs.readFileSync(file, "utf8");
+      const { frontmatter, body } = splitMarkdown(raw);
+      const title = frontmatterValue(frontmatter, "title", path.basename(file));
+      return `| ${path.relative(root, file).replace(/\\/g, "/")} | ${title} | ${chineseCount(body)} | ${body.includes("## 模板正文") ? "是" : "否"} | ${body.includes("## 填写示例") ? "是" : "否"} | 已完成 |`;
+    })
+    .join("\n");
+  const glossaryRows = glossaryFiles
+    .map((file) => {
+      const raw = fs.readFileSync(file, "utf8");
+      const { frontmatter, body } = splitMarkdown(raw);
+      const title = frontmatterValue(frontmatter, "title", path.basename(file));
+      return `| ${path.relative(root, file).replace(/\\/g, "/")} | ${title} | ${chineseCount(body)} | ${body.includes("## 需求设计影响") ? "是" : "否"} | ${body.includes("## 技术协作问题") ? "是" : "否"} | 已完成 |`;
+    })
+    .join("\n");
   return `# 内容审计报告
 
 本文件记录本次系统性扩写后的内容状态，供后续维护者检查课程、项目、模板和术语库质量。
@@ -1144,49 +1300,74 @@ function main() {
   const lessonsByStage = new Map();
   for (const file of courseFiles) {
     const stageSlug = stageNameFromPath(file);
-    if (path.basename(file) !== 'index.md') {
-      const raw = fs.readFileSync(file, 'utf8');
+    if (path.basename(file) !== "index.md") {
+      const raw = fs.readFileSync(file, "utf8");
       const { frontmatter } = splitMarkdown(raw);
-      const title = frontmatterValue(frontmatter, 'title', path.basename(file, '.md'));
+      const title = frontmatterValue(
+        frontmatter,
+        "title",
+        path.basename(file, ".md"),
+      );
       if (!lessonsByStage.has(stageSlug)) lessonsByStage.set(stageSlug, []);
       lessonsByStage.get(stageSlug).push({ file, title });
     }
   }
 
   for (const file of courseFiles) {
-    const raw = fs.readFileSync(file, 'utf8');
+    const raw = fs.readFileSync(file, "utf8");
     const { frontmatter } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file, '.md'));
+    const title = frontmatterValue(
+      frontmatter,
+      "title",
+      path.basename(file, ".md"),
+    );
     const stageSlug = stageNameFromPath(file);
-    const body = path.basename(file) === 'index.md'
-      ? generateStageIndex(title, file, lessonsByStage.get(stageSlug) || [])
-      : generateCourseLesson(title, file);
+    const body =
+      path.basename(file) === "index.md"
+        ? generateStageIndex(title, file, lessonsByStage.get(stageSlug) || [])
+        : generateCourseLesson(title, file);
     writeMarkdown(file, frontmatter, body);
   }
 
   for (const file of listMarkdownFiles(projectsDir)) {
-    const raw = fs.readFileSync(file, 'utf8');
+    const raw = fs.readFileSync(file, "utf8");
     const { frontmatter } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file, '.md'));
+    const title = frontmatterValue(
+      frontmatter,
+      "title",
+      path.basename(file, ".md"),
+    );
     writeMarkdown(file, frontmatter, generateProject(title, file));
   }
 
   for (const file of listMarkdownFiles(templatesDir)) {
-    const raw = fs.readFileSync(file, 'utf8');
+    const raw = fs.readFileSync(file, "utf8");
     const { frontmatter } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file, '.md'));
+    const title = frontmatterValue(
+      frontmatter,
+      "title",
+      path.basename(file, ".md"),
+    );
     writeMarkdown(file, frontmatter, generateTemplate(title));
   }
 
   for (const file of listMarkdownFiles(glossaryDir)) {
-    const raw = fs.readFileSync(file, 'utf8');
+    const raw = fs.readFileSync(file, "utf8");
     const { frontmatter } = splitMarkdown(raw);
-    const title = frontmatterValue(frontmatter, 'title', path.basename(file, '.md'));
+    const title = frontmatterValue(
+      frontmatter,
+      "title",
+      path.basename(file, ".md"),
+    );
     writeMarkdown(file, frontmatter, generateGlossary(title));
   }
 
-  fs.writeFileSync(path.join(root, 'docs', 'content-audit.md'), generateAuditDocument(), 'utf8');
-  console.log('内容深度扩写完成。');
+  fs.writeFileSync(
+    path.join(root, "docs", "content-audit.md"),
+    generateAuditDocument(),
+    "utf8",
+  );
+  console.log("内容深度扩写完成。");
 }
 
 main();

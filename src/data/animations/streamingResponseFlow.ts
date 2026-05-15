@@ -1,0 +1,82 @@
+import type { FlowAnimationDefinition } from "../../components/animations/animationTypes";
+
+export const streamingResponseFlow: FlowAnimationDefinition = {
+  id: "streaming-response-flow",
+  type: "flow",
+  title: "流式响应流程",
+  description: "展示 AI 回答如何从服务端分片返回，并被前端逐步渲染给用户。",
+  tags: ["Streaming", "响应体验", "SSE"],
+  why: "流式响应能显著改善等待体验，但也要求产品经理设计好中间态、停止生成、失败提示和记录保存。",
+  hint: "流式响应的产品价值不是更炫，而是让用户更早判断结果方向是否可用。",
+  data: {
+    autoPlay: false,
+    interval: 4100,
+    steps: [
+      {
+        id: "ask",
+        title: "用户发送问题",
+        description: "用户提交问题或生成请求。",
+        nodeType: "input",
+        details: "做什么：用户触发一次需要模型生成的任务。\nPM关注：提交后要进入明确的生成状态，并允许用户理解是否正在等待。\n技术实现：请求参数、会话 ID、取消标识、前端状态。\n做不好会出现：用户以为卡住，重复提交导致成本和状态混乱。",
+      },
+      {
+        id: "connect",
+        title: "服务端建立连接",
+        description: "后端建立 SSE、Fetch Stream 或 WebSocket 通道。",
+        nodeType: "process",
+        details: "做什么：保持一个可以持续推送内容的连接。\nPM关注：要定义连接中断、超时、重连和用户主动停止的体验。\n技术实现：SSE、流式 fetch、心跳、超时控制。\n做不好会出现：网络波动时页面无反馈，用户不知道内容是否还会继续。",
+      },
+      {
+        id: "generate",
+        title: "模型开始生成",
+        description: "模型根据 Prompt 和上下文逐步生成内容。",
+        nodeType: "ai",
+        details: "做什么：模型按 token 或文本片段生成。\nPM关注：首字时间、总耗时、输出安全和停止生成。\n技术实现：流式模型 API、token 回调、内容审核。\n做不好会出现：首屏等待过长，流式响应失去体验价值。",
+      },
+      {
+        id: "chunks",
+        title: "分片返回内容",
+        description: "服务端把生成内容拆成多个片段推给前端。",
+        nodeType: "process",
+        details: "做什么：持续返回 delta 内容、状态事件或错误事件。\nPM关注：哪些中间状态需要展示，例如生成中、引用处理中、完成。\n技术实现：chunk 格式、事件类型、序号、错误事件。\n做不好会出现：片段乱序、重复、丢失，导致页面内容异常。",
+      },
+      {
+        id: "render",
+        title: "前端逐步渲染",
+        description: "前端把片段追加到页面中。",
+        nodeType: "output",
+        details: "做什么：把新内容持续追加到对话或结果区域。\nPM关注：滚动、光标、停止按钮、复制按钮和生成中状态。\n技术实现：状态合并、Markdown 渲染、滚动控制、取消请求。\n做不好会出现：页面跳动、文字错乱或用户无法中止生成。",
+      },
+      {
+        id: "early-view",
+        title: "用户提前看到结果",
+        description: "用户不用等完整结束就能判断结果方向。",
+        nodeType: "output",
+        details: "做什么：用户可以更早发现答案是否跑偏。\nPM关注：是否允许用户停止、追问、编辑或重新生成。\n技术实现：中断接口、局部保存、追问状态。\n做不好会出现：用户只能被动等待，流式体验没有形成任务效率提升。",
+      },
+      {
+        id: "finish",
+        title: "生成完成",
+        description: "模型结束输出并返回完成信号。",
+        nodeType: "decision",
+        details: "做什么：标记内容完整，补充引用、用量或后处理结果。\nPM关注：完成后要让用户明确知道结果可复制、可编辑或可反馈。\n技术实现：done 事件、最终状态、token 统计、后处理。\n做不好会出现：用户不知道是否还在生成，也无法判断结果是否完整。",
+      },
+      {
+        id: "save",
+        title: "保存对话记录",
+        description: "保存最终内容、过程状态和反馈入口。",
+        nodeType: "database",
+        details: "做什么：把完整内容、耗时、模型、成本和用户反馈写入记录。\nPM关注：保存内容要支持历史查看、复盘、质检和用户删除。\n技术实现：消息表、任务表、日志、脱敏和权限。\n做不好会出现：刷新页面内容丢失，团队无法评估生成质量。",
+      },
+    ],
+    edges: [
+      { id: "e1", source: "ask", target: "connect", label: "提交" },
+      { id: "e2", source: "connect", target: "generate", label: "建立流" },
+      { id: "e3", source: "generate", target: "chunks", label: "分片" },
+      { id: "e4", source: "chunks", target: "render", label: "渲染" },
+      { id: "e5", source: "render", target: "early-view", label: "可见" },
+      { id: "e6", source: "early-view", target: "finish", label: "完成" },
+      { id: "e7", source: "finish", target: "save", label: "保存" },
+    ],
+  },
+};

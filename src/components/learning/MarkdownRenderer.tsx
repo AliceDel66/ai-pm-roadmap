@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+
+const LazyAnimationRenderer = lazy(() => import("../animations/AnimationRenderer"));
 
 export function MarkdownRenderer({ content }: { content: string }) {
   const sections = useMemo(() => splitQuizSection(content), [content]);
@@ -19,6 +21,31 @@ export function MarkdownRenderer({ content }: { content: string }) {
 }
 
 function MarkdownBlock({ content }: { content: string }) {
+  const blocks = useMemo(() => splitAnimationPlaceholders(content), [content]);
+
+  if (blocks.length > 1 || blocks[0]?.type === "animation") {
+    return (
+      <>
+        {blocks.map((block, index) => {
+          if (block.type === "markdown") return <MarkdownContent key={`markdown-${index}`} content={block.content} />;
+          if (!block.animationId) return <InvalidAnimationPlaceholder key={`animation-${index}`} raw={block.raw} />;
+
+          return (
+            <Suspense key={`animation-${block.animationId}-${index}`} fallback={<AnimationLoading animationId={block.animationId} />}>
+              <LazyAnimationRenderer animationId={block.animationId} />
+            </Suspense>
+          );
+        })}
+      </>
+    );
+  }
+
+  return <MarkdownContent content={content} />;
+}
+
+function MarkdownContent({ content }: { content: string }) {
+  if (!content.trim()) return null;
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -42,6 +69,51 @@ function MarkdownBlock({ content }: { content: string }) {
     >
       {content}
     </ReactMarkdown>
+  );
+}
+
+type MarkdownPart =
+  | { type: "markdown"; content: string }
+  | { type: "animation"; animationId: string; raw: string };
+
+function splitAnimationPlaceholders(content: string): MarkdownPart[] {
+  const parts: MarkdownPart[] = [];
+  const placeholderPattern = /^\s*\[animation:([^\]]*)\]\s*$/gm;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = placeholderPattern.exec(content)) !== null) {
+    if (match.index > lastIndex) parts.push({ type: "markdown", content: content.slice(lastIndex, match.index) });
+
+    const raw = match[0];
+    const animationId = match[1].trim();
+    parts.push({
+      type: "animation",
+      animationId: /^[a-z0-9][a-z0-9-]*$/.test(animationId) ? animationId : "",
+      raw,
+    });
+
+    lastIndex = match.index + raw.length;
+  }
+
+  if (lastIndex < content.length) parts.push({ type: "markdown", content: content.slice(lastIndex) });
+  return parts.length > 0 ? parts : [{ type: "markdown", content }];
+}
+
+function AnimationLoading({ animationId }: { animationId: string }) {
+  return (
+    <div className="my-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100" role="status">
+      正在加载教学动画：{animationId}
+    </div>
+  );
+}
+
+function InvalidAnimationPlaceholder({ raw }: { raw: string }) {
+  return (
+    <div className="my-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-900 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100" role="status">
+      <p className="m-0 font-semibold">动画占位格式不正确</p>
+      <p className="m-0 mt-1">请使用类似 [animation:rag-flow] 的格式。当前内容：{raw}</p>
+    </div>
   );
 }
 

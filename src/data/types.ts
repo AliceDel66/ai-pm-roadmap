@@ -42,6 +42,7 @@ export interface ToolItem {
   purpose: string;
   usage: string;
   priority: "优先" | "建议" | "了解";
+  url: string;
 }
 
 export interface ToolCategory {
