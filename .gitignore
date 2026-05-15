@@ -5,3 +5,5 @@ node_modules/
 /hf-ai-pm-promo/
 hf-ai-pm-promo/
 *.log
+node_modules/
+记忆/
