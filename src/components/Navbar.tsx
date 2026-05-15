@@ -1,6 +1,7 @@
-import { Menu, Moon, Sparkles, Sun, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 const navItems = [
   ["首页", "/"],
@@ -39,12 +40,14 @@ export function Navbar({ darkMode, onToggleTheme }: NavbarProps) {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/75">
       <div className="container-page flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-left focus-ring">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-slate-950 text-white dark:bg-white dark:text-slate-950">
-            <Sparkles size={18} />
-          </span>
+          <img
+            src={logo}
+            alt="Coriander logo"
+            className="h-9 w-9 rounded-lg object-contain ring-1 ring-slate-200/80 dark:ring-white/10"
+          />
           <span>
-            <span className="block text-sm font-semibold text-slate-950 dark:text-white">AI 产品经理</span>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">成长路线图</span>
+            <span className="block text-sm font-semibold text-slate-950 dark:text-white">Coriander</span>
+            <span className="block text-xs text-slate-500 dark:text-slate-400">AgentSkill.asia</span>
           </span>
         </Link>
 
@@ -91,7 +94,7 @@ export function Navbar({ darkMode, onToggleTheme }: NavbarProps) {
             {navItems.map(([label, id]) => (
               <button
                 key={id}
-              onClick={() => go(id)}
+                onClick={() => go(id)}
                 className="rounded-lg px-3 py-3 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
               >
                 {label}
