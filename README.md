@@ -14,7 +14,7 @@ _从 0 到 1 学 AI 产品经理：课程、项目、模板、术语、作品集
 
 **给想转向 AI 产品经理的人，一条真正能读、能练、能做项目、能沉淀作品集的学习路径。**
 
-**维护者：Coriander · 在线站点：[www.agentskill.asia](https://www.agentskill.asia/)**
+**维护者：Coriander · 在线站点：[aipro.agentskill.asia](http://aipro.agentskill.asia/)**
 
 ```bash
 git clone https://github.com/AliceDel66/ai-pm-roadmap.git
