@@ -65,6 +65,7 @@ function MarkdownContent({ content }: { content: string }) {
         th: ({ children }) => <th className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-left font-semibold text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white">{children}</th>,
         td: ({ children }) => <td className="border-b border-slate-100 px-4 py-3 leading-7 text-slate-700 dark:border-white/10 dark:text-slate-300">{children}</td>,
         a: ({ children, href }) => <a href={href} className="font-medium text-blue-700 underline decoration-blue-200 underline-offset-4 dark:text-cyan-300">{children}</a>,
+        img: ({ src, alt, title }) => <img src={src || ""} alt={alt || ""} title={title} loading="lazy" className="my-6 w-full rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10" />,
       }}
     >
       {content}

@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "content:audit": "node scripts/content-audit.mjs",
     "content:verify": "node scripts/verify-content-state.mjs",
+    "images:generate": "node scripts/generate-content-images.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
